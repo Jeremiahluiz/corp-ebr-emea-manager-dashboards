@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Slack delivery test | Weekly Performance</title>
+    <style>
+      :root {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #1f2328;
+        background: #f6f8fa;
+        --blue: #0969da;
+        --green: #1a7f37;
+        --purple: #8250df;
+        --border: #d0d7de;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f6f8fa; }
+      .topbar {
+        padding: 28px 5vw;
+        color: #fff;
+        background: linear-gradient(110deg, #24292f, #3b1f75);
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 24px;
+      }
+      .topbar h1 { margin: 14px 0 8px; font-size: clamp(28px, 4vw, 46px); }
+      .topbar p { margin: 0; color: #d8c7ff; }
+      .test-badge {
+        min-height: 44px;
+        padding: 11px 16px;
+        border: 1px solid #8c959f;
+        border-radius: 8px;
+        background: #fff;
+        color: #1f2328;
+        font-weight: 750;
+      }
+      main {
+        width: min(1500px, 94vw);
+        margin: 22px auto 60px;
+        display: grid;
+        gap: 22px;
+      }
+      .status {
+        margin: 0;
+        padding: 14px 18px;
+        color: #633c01;
+        background: #fff8c5;
+        border: 1px solid #d4a72c;
+        border-radius: 10px;
+        font-weight: 700;
+      }
+      .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .cards article, .panel, .previous-week, .closed-won-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(31, 35, 40, .08);
+      }
+      .cards article { padding: 22px; border-top: 6px solid var(--blue); }
+      .cards article:nth-child(2) { border-top-color: var(--green); }
+      .cards article:nth-child(3), .cards article:nth-child(4) { border-top-color: var(--purple); }
+      .cards span, .previous-week span, .closed-won-label {
+        display: block;
+        color: #57606a;
+        font-size: 13px;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+      }
+      .cards strong { display: block; margin-top: 12px; font-size: 25px; }
+      .placeholder { color: #8c959f; font-style: italic; font-weight: 650; }
+      .previous-week {
+        padding: 18px 24px;
+        background: #fff8c5;
+        border-color: #d4a72c;
+        display: grid;
+        grid-template-columns: 1.4fr repeat(5, 1fr);
+        gap: 18px;
+        align-items: center;
+      }
+      .previous-week strong { display: block; margin-top: 7px; font-size: 17px; }
+      .closed-won-card {
+        padding: 20px 24px;
+        background: #dafbe1;
+        border-color: #2da44e;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 6px 20px;
+        align-items: center;
+      }
+      .closed-won-value { color: #8c959f; font-size: 25px; font-style: italic; }
+      .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+      .panel { padding: 22px; min-width: 0; }
+      .pipeline-panel {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        gap: 28px;
+      }
+      .panel-title { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+      .panel-title h2 { margin: 0; font-size: 22px; }
+      .empty-chart {
+        height: 285px;
+        display: grid;
+        place-items: center;
+        margin-top: 14px;
+        color: #8c959f;
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        background: #f6f8fa;
+        font-weight: 650;
+      }
+      .table-wrap { overflow-x: auto; margin-top: 16px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td {
+        padding: 13px 10px;
+        border-bottom: 1px solid #eaeef2;
+        text-align: right;
+        white-space: nowrap;
+      }
+      th { color: #57606a; font-size: 12px; text-transform: uppercase; }
+      th:first-child, th:nth-child(2), td:first-child, td:nth-child(2) { text-align: left; }
+      .empty-row td { padding: 28px 10px; text-align: center; color: #8c959f; font-style: italic; }
+      .featured { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+      .empty { padding: 24px 0 0; color: #8c959f; font-style: italic; }
+      .eyebrow {
+        margin: 0 0 5px;
+        color: #d8c7ff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      @media (max-width: 900px) {
+        .topbar { align-items: start; flex-direction: column; }
+        .cards, .charts, .featured { grid-template-columns: 1fr; }
+        .pipeline-panel { grid-column: auto; grid-template-columns: 1fr; }
+        .previous-week { grid-template-columns: repeat(2, 1fr); }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">WEEKLY PERFORMANCE DASHBOARD</p>
+        <h1>Slack delivery test</h1>
+        <p>No production data. Isolated page for validating Slack link delivery.</p>
+      </div>
+      <span class="test-badge">Test artifact only</span>
+    </header>
+    <main>
+      <p class="status">No production data. This page does not load customer, account, opportunity, or activity data.</p>
+      <h2>Quarter-to-date activity and pipeline</h2>
+      <section class="cards" aria-label="Empty quarter-to-date metrics">
+        <article><span>Events created</span><strong class="placeholder">No data</strong></article>
+        <article><span>SQL held</span><strong class="placeholder">No data</strong></article>
+        <article><span>Licensed pipeline</span><strong class="placeholder">No data</strong></article>
+        <article><span>Metered / total</span><strong class="placeholder">No data</strong></article>
+      </section>
+      <section class="previous-week" aria-label="Empty previous week metrics">
+        <div><span>Previous completed week</span><strong class="placeholder">Not set</strong></div>
+        <div><span>Events created</span><strong class="placeholder">No data</strong></div>
+        <div><span>SQL held</span><strong class="placeholder">No data</strong></div>
+        <div><span>Licensed</span><strong class="placeholder">No data</strong></div>
+        <div><span>Metered</span><strong class="placeholder">No data</strong></div>
+        <div><span>Total pipeline</span><strong class="placeholder">No data</strong></div>
+      </section>
+      <section class="closed-won-card">
+        <span class="closed-won-label">EBR-attributed revenue</span>
+        <strong class="closed-won-value">No data</strong>
+        <small>This test page contains no revenue records.</small>
+      </section>
+      <section class="charts">
+        <article class="panel">
+          <div class="panel-title"><h2>Events created</h2><strong class="placeholder">No data</strong></div>
+          <div class="empty-chart">Empty test chart</div>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><h2>SQL held</h2><strong class="placeholder">No data</strong></div>
+          <div class="empty-chart">Empty test chart</div>
+        </article>
+        <article class="panel pipeline-panel">
+          <div>
+            <div class="panel-title"><h2>Pipeline</h2><strong class="placeholder">No data</strong></div>
+            <div class="empty-chart">Empty test chart</div>
+          </div>
+          <div>
+            <div class="panel-title"><h2>Current stage funnel</h2></div>
+            <div class="empty-chart">No mapped pipeline</div>
+          </div>
+        </article>
+      </section>
+      <section class="panel">
+        <div class="panel-title"><h2>IC breakdown</h2></div>
+        <p>No production data is included in this delivery test.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>AE / IC</th>
+                <th>EBR</th>
+                <th>Events created</th>
+                <th>SQL</th>
+                <th>Licensed</th>
+                <th>Metered</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="empty-row"><td colspan="7">No production records</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="featured">
+        <article class="panel">
+          <div class="panel-title"><h2>Business Selected</h2><strong class="placeholder">No data</strong></div>
+          <p class="empty">No production opportunities</p>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><h2>Closed Won pipeline</h2><strong class="placeholder">No data</strong></div>
+          <p class="empty">No production opportunities</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
